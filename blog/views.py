@@ -8,9 +8,6 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     posts = todays_recent_posts(5)
-    for row in posts:
-        print row[1]
-
     return render_template("index.html", posts=posts)
 
 
@@ -60,16 +57,36 @@ def add_post():
         user.add_post(title, tags, text)
     return redirect(url_for("index"))
 
+
 @app.route("/like_post/<post_id>")
 def like_post(post_id):
-    return "TODO"
+    username = session.get("username")
+
+    if not username:
+        flash("You must be logged in to like a post.")
+        return redirect(url_for("login"))
+
+    user = User(username)
+    user.like_post(post_id)
+    flash("Liked post.")
+    return redirect(request.referrer)
 
 
 @app.route("/profile/<username>")
 def profile(username):
-    return "TODO"
+    user1 = User(session.get("username"))
+    user2 = User(username)
+    posts = user2.recent_posts(6)
+
+    similar = []
+    if user1.username == user2.username:
+        similar = user1.similar_users(3)
+
+    return render_template("profile.html", username=username, posts=posts, similar=similar)
 
 
 @app.route("/logout")
 def logout():
-    return "TODO"
+    session.pop("username")
+    flash("Logged out.")
+    return redirect(url_for("index"))

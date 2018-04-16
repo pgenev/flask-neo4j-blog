@@ -59,6 +59,34 @@ class User:
             rel = Relationship(t, "TAGGED", post)
             graph.create(rel)
 
+    def like_post(self, post_id):
+        user = self.find()
+        post = graph.find_one("Post", "id", post_id)
+        # TODO: Check if the create_unique() method is needed
+        rel = Relationship(user, "LIKES", post)
+        graph.create(rel)
+
+    def recent_posts(self, n):
+        query = """
+        MATCH (user:User)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
+        WHERE user.username = {username}
+        RETURN post, COLLECT(tag.name) AS tags
+        ORDER BY post.timestamp DESC LIMIT {n}
+        """
+        return graph.run(query, username=self.username, n=n).data()
+
+    def similar_users(self, n):
+        # TODO: Try to understand this query
+        query = """
+        MATCH (user1:User)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag:Tag),
+              (user2:User)-[:PUBLISHED]->(:Post)<-[:TAGGED]-(tag:Tag)
+        WHERE user1.username = {username} AND user1 <> user2
+        WITH user2, COLLECT(DISTINCT tag.name) AS tags, COUNT(DISTINCT tag.name) as tag_count
+        ORDER BY tag_count DESC LIMIT {n}
+        RETURN user2.username AS similar_user, tags
+        """
+        return graph.run(query, username=self.username, n=n)
+
 def todays_recent_posts(n):
     query = """
     MATCH (user:User)-[:PUBLISHED]->(post:Post)<-[:TAGGED]-(tag:Tag)
@@ -68,4 +96,4 @@ def todays_recent_posts(n):
     """
 
     today = datetime.now().strftime("%Y-%m-%d")
-    return graph.run(query, today=today, n=n)
+    return graph.run(query, today=today, n=n).data()
