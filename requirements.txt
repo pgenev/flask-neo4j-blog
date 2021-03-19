@@ -13,7 +13,7 @@ ipython==5.6.0
 ipython-cypher==0.2.6
 ipython-genutils==0.2.0
 itsdangerous==0.24
-Jinja2==2.10
+Jinja2==2.11.3
 MarkupSafe==1.0
 neo4jrestclient==2.1.1
 passlib==1.7.1
