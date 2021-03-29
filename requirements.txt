@@ -25,7 +25,7 @@ prompt-toolkit==1.0.15
 ptyprocess==0.5.2
 py2neo==3.1.2
 pycparser==2.18
-Pygments==2.2.0
+Pygments==2.7.4
 requests==2.18.4
 scandir==1.7
 simplegeneric==0.8.1
